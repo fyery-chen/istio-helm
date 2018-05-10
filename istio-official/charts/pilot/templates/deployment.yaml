@@ -28,17 +28,8 @@ spec:
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           args:
           - "discovery"
-{{- if $.Values.global.oneNamespace }}
-          - "-a"
-          - {{ .Release.Namespace }}
-{{- end }}
-# TODO(sdake) remove when secrets are automagically registered
-{{- if .Values.global.multicluster.enabled }}
-          - "--clusterRegistriesConfigMap"
-          - "clusterregistry"
-          - "--clusterRegistriesNamespace"
-          - "istio-system"
-{{- end }}
+          - "--admission-service"
+          - "istio-pilot"
           ports:
           - containerPort: 8080
           - containerPort: 15010
