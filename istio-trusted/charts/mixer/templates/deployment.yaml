@@ -36,8 +36,8 @@ spec:
           - name: config-volume
             mountPath: /etc/statsd
         - name: {{ template "mixer.name" . }}
-          image: "{{ .Values.global.hub }}/mixer:{{ .Values.global.tag }}"
-          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
           - containerPort: 9091
           - containerPort: 9093
@@ -51,7 +51,7 @@ spec:
           resources:
 {{ toYaml .Values.resources | indent 12 }}
         - name: {{ template "mixer.name" . }}-proxy
-          image: "{{ .Values.global.hub }}/{{ .Values.global.proxy.image }}:{{ .Values.global.tag }}"
+          image: "{{ .Values.global.proxy.image }}:{{ .Values.global.tag }}"
           imagePullPolicy: {{ .Values.global.imagePullPolicy }}
           ports:
           - containerPort: 15004

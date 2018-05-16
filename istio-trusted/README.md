@@ -1,16 +1,9 @@
 # Istio
 
-**It is based on Helm community chart [istio](https://github.com/istio/istio/)**
+**It is based on Helm community chart [istio](https://github.com/istio/istio/tree/master/install/kubernetes/helm/istio)**. And any questions about Istio, you can access the [Istio Documentation](https://istio.io/docs/).
 
 [Istio](https://istio.io/), Istio is an open platform that provides a uniform way to connect, manage, and secure microservices. Istio supports managing traffic flows between microservices, enforcing access policies, and aggregating telemetry data, all without requiring changes to the microservice code.
 
-## TL;DR;
-
-```console
-$ helm repo add tc http://trusted-charts.stackpoint.io/
-$ helm repo up
-$ helm install --name istio --namespace istio-system tc/istio
-```
 
 ## Introduction
 
@@ -18,43 +11,30 @@ This chart bootstraps a [Istio](https://istio.io/) deployment on a [Kubernetes](
 
 ## Prerequisites
 
-- Kubernetes 1.9+ if you would like to use the Initializer (auto-inject)
+- Kubernetes 1.9+ 
 - istioctl
 
-### istioctl installation steps
+## Components
 
-Run
-```console
-curl -L https://git.io/getLatestIstio | sh -
-```
-to download and extract the latest release automatically (on MacOS and Ubuntu), the `istioctl` client will be added to your PATH by the above shell command.
+[Mixer](https://istio.io/docs/concepts/policy-and-control/mixer.html)
 
-## RBAC
-By default the chart is installed with RBAC roles and rolebindings.
+[Pilot](https://istio.io/docs/concepts/traffic-management/pilot.html)
 
-## Installing the Chart
+[Istio-ingress](https://istio.io/docs/tasks/traffic-management/ingress.html)
 
-It is recommended that you install Istio into the istio-system namespace.
+[Security](https://istio.io/docs/concepts/security/)
 
-To install the chart with the release name `istio` into the namespace istio-system:
 
-```console
-$ helm install --name istio --namespace istio-system tc/istio
-```
+## Deploy your application
+Once you have deployed the Istio catalog, then you can deploy your own application or one of the sample applications provided with the installation like [Bookinfo](https://istio.io/docs/guides/bookinfo.html). Note: the application must use HTTP/1.1 or HTTP/2.0 protocol for all its HTTP traffic because HTTP/1.0 is not supported.
 
-The command deploys Istio on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
-
-> **Tip**: List all releases using `helm list`
-
-## Uninstalling the Chart
-
-To uninstall/delete the `istio` deployment:
+Because the deployment does not have the Istio-sidecar-injector installed, so you must use [istioctr kube-inject](https://istio.io/docs/reference/commands/istioctl.html#istioctl%20kube-inject) to manually inject Envoy containers in your application pods before deploying them:
 
 ```console
-$ helm delete istio
+$ kubectl create -f <(istioctl kube-inject -f <your-app-spec>.yaml)
 ```
 
-The command removes all the Kubernetes components associated with the chart and deletes the release.
+[Here](https://istio.io/docs/setup/kubernetes/sidecar-injection.html#manual-sidecar-injection) is the detailed description about how to install the Istio Sidecar.
 
 ## Configuration
 
@@ -64,12 +44,53 @@ The following tables lists the configurable parameters of the Istio chart and th
 
 Parameter | Description | Default
 --------- | ----------- | -------
- |  |  |
-
-Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`.
-
-Alternatively, a YAML file that specifies the values for the above parameters can be provided while installing the chart. For example,
-
-```console
-$ helm install tc/istio --name istio --namespace istio-system -f values.yaml
-```
+global.proxy.image |  The image of Istio proxy| `istio/proxy` |
+global.proxy.initImage |  The initial image of Istio proxy| `istio/proxy_init` |
+global.tag |  The image tag of Istio proxy| `0.7.1` |
+mixer.enabled |  Enabled the mixer component of Istio| `true` |
+mixer.replicaCount |  The number of mixer pods| `1` |
+mixer.image.repository |  The mixer image repository| `istio/mixer` |
+mixer.image.tag |  The mixer image tag| `0.7.1` |
+mixer.prometheusStatsdExporter.repository | The promutheus stas exporter image repository | `prom/statsd-exporter`
+mixer.prometheusStatsdExporter.tag | The prometheus stas exporter image tag | `latest`
+pilot.enabled | Enabled the pilot component of istio | `true`
+pilot.replicaCount | The number of pilot pods | `1`
+pilot.image.repository | The pilot image repository | `istio/pilot`
+pilot.image.tag| The pilot image tag | `0.7.1`
+grafana.enabled | Enabled the grafana component of istio | `false`
+grafana.replicaCount | The number of grafana pods | `1`
+grafana.image.repository | The grafana image repository | `istio/grafana`
+grafana.image.tag | The grafana image tag| `0.7.1`
+grafana.ingress.enabled | Expose grafana using layer 7 load balancer | `false`
+grafana.ingress.hosts | The hostname to access the grafana | `grafana.local`
+grafana.service.type | Grafana service type | `NodePort`
+servicegraph.enabled | Enabled the servicegraph component of istio | `false`
+servicegraph.replicaCount | The number of servicegraph pods | `1`
+servicegraph.image.repository | The servicegraph image repository | `istio/servicegraph`
+servicegraph.image.tag | The servicegraph image tag | `0.7.1`
+servicegraph.ingress.enabled | Expose servicegraph using layer 7 load balancer | `false`
+servicegraph.ingress.hosts | The hostname to access the servicegraph | `servicegraph.local`
+servicegraph.service.type | Servicegraph service type | `NodePort`
+zipkin.enabled | Enabled the zipkin component of istio | `false`
+zipkin.replicaCount | The number of zipkin pods | `1`
+zipkin.image.repository | The zipkin image repository | `openzipkin/zipkin`
+zipkin.image.tag | The zipkin image tag | `latest`
+zipkin.ingress.enabled | Expose zipkin using layer 7 load balancer | `false`
+zipkin.ingress.hosts | The hostname to access the zipkin | `zipkin.local`
+zipkin.service.type | zipkin service type | `NodePort`
+prometheus.enabled | Enabled the prometheus component of istio | `false`
+prometheus.replicaCount | The number of prometheus pods | `1`
+prometheus.image.repository | The prometheus image repository | `prom/prometheus`
+prometheus.image.tag | The prometheus image tag | `latest`
+prometheus.ingress.enabled | Expose prometheus using layer 7 load balancer | `false`
+prometheus.ingress.hosts | The hostname to access the prometheus | `prometheus.local`
+prometheus.service.nodePort.enabled | Set the service type to `NodePort` | `true`
+prometheus.service.nodePort.port | Specify the node port | `32090`
+security.replicaCount | The number of security pods | `1`
+security.image.repository | The security image repository | `istio/istio-ca`
+security.image.tag | The security image tag | `0.7.1`
+ingress.enabled | Expose istio using layer 7 load balancer | `true`
+ingress.autoscaleMin | The autoscale minimum number of istio ingress | `2`
+ingress.autoscaleMax | The autoscale maximum number of istio ingress | `8`
+ingress.service.nodePort.enabled | Set the service type to `NodePort`, default `LoadBalancer` | `false`
+ingress.service.nodePort.port | Specify the node port | `32000`

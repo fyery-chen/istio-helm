@@ -13,7 +13,8 @@ global:
   # Currently using nightly build, for testing
   tag: 0.7.1
   proxy:
-    image: proxy
+    image: istio/proxy
+    initImage: istio/proxy_init
 
   # imagePullPolicy is applied to istio control plane components.
   imagePullPolicy: IfNotPresent
@@ -75,7 +76,10 @@ sidecar-injector:
   enabled: false
   serviceAccountName: default # used only if RBAC is not enabled
   replicaCount: 1
-  imagePullPolicy: IfNotPresent
+  image:
+    repository: istio/sidecar_injector
+    tag: 0.7.1
+    pullPolicy: IfNotPresent
   resources: {}
   # limits:
   #  cpu: 100m
@@ -99,7 +103,10 @@ mixer:
   enabled: true
   serviceAccountName: default # used only if RBAC is not enabled
   replicaCount: 1
-  imagePullPolicy: IfNotPresent
+  image:
+    repository: istio/mixer
+    tag: 0.7.1
+    pullPolicy: IfNotPresent
   resources: {}
   # limits:
   #  cpu: 100m
@@ -122,7 +129,10 @@ pilot:
   enabled: true
   serviceAccountName: default # used only if RBAC is not enabled
   replicaCount: 1
-  imagePullPolicy: IfNotPresent
+  image:
+    repository: istio/pilot
+    tag: 0.7.1
+    pullPolicy: IfNotPresent
   resources: {}
   # limits:
   #  cpu: 100m
@@ -138,7 +148,10 @@ pilot:
 security:
   serviceAccountName: default # used only if RBAC is not enabled
   replicaCount: 1
-  imagePullPolicy: IfNotPresent
+  image:
+    repository: istio/istio-ca
+    tag: 0.7.1
+    pullPolicy: IfNotPresent
   resources: {}
   # limits:
   #  cpu: 100m
@@ -152,16 +165,19 @@ security:
 # addons configuration
 #
 grafana:
-  enabled: true
+  enabled: false 
   replicaCount: 1
-  imagePullPolicy: IfNotPresent
+  image:
+    repository: istio/grafana
+    tag: 0.7.1
+    pullPolicy: IfNotPresent
   service:
     name: http
     type: NodePort
     externalPort: 3000
     internalPort: 3000
   ingress:
-    enabled: true
+    enabled: false 
     # Used to create an Ingress record.
     hosts:
       - grafana.local
@@ -184,10 +200,10 @@ grafana:
   nodeSelector: {}
 
 prometheus:
-  enabled: true
+  enabled: false 
   replicaCount: 1
   image:
-    repository: docker.io/prom/prometheus
+    repository: prom/prometheus
     tag: latest
     pullPolicy: IfNotPresent
   ingress:
@@ -213,20 +229,23 @@ prometheus:
   nodeSelector: {}
   service:
     nodePort:
-      enabled: true
+      enabled: true 
       port: 32090
 
 servicegraph:
-  enabled: true
+  enabled: false 
   replicaCount: 1
-  imagePullPolicy: IfNotPresent
+  image:
+    repository: istio/servicegraph
+    tag: 0.7.1
+    pullPolicy: IfNotPresent
   service:
     name: http
     type: NodePort
     externalPort: 8088
     internalPort: 8088
   ingress:
-    enabled: true
+    enabled: false 
     # Used to create an Ingress record.
     hosts:
       - servicegraph.local
@@ -250,10 +269,10 @@ servicegraph:
   prometheusAddr: http://prometheus:9090
 
 zipkin:
-  enabled: true
+  enabled: false 
   replicaCount: 1
   image:
-    repository: docker.io/openzipkin/zipkin
+    repository: openzipkin/zipkin
     tag: latest
     pullPolicy: IfNotPresent
   service:
@@ -262,7 +281,7 @@ zipkin:
     externalPort: 9411
     internalPort: 9411
   ingress:
-    enabled: true
+    enabled: false 
     # Used to create an Ingress record.
     hosts:
       - zipkin.local

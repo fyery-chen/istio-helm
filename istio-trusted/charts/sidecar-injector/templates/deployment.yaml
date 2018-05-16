@@ -19,8 +19,8 @@ spec:
     spec:
       containers:
         - name: sidecar-injector-webhook
-          image: "{{ .Values.global.hub }}/sidecar_injector:{{ .Values.global.tag }}"
-          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             - --tlsCertFile=/etc/istio/certs/cert.pem
             - --tlsKeyFile=/etc/istio/certs/key.pem
